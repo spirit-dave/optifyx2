@@ -51,16 +51,3 @@ The application dynamically updates the spam-to-non-spam ratio using a pie chart
 - **Machine Learning**: Scikit-learn, Naive Bayes Classifier
 - **Data Preprocessing**: TfidfVectorizer
 
----
-
-## Contributions
-
-Contributions, bug reports, and feature requests are welcome! Feel free to fork this repository and submit pull requests.
-
----
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
-# optifyx2
