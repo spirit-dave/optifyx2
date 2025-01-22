@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Spam Detector</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        textarea {
+            resize: none;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Email Spam Detector</h1>
+        <form action="/predict" method="POST" id="spam-form">
+            <div class="mb-3">
+                <label for="email_text" class="form-label">Enter Email Text:</label>
+                <textarea class="form-control" id="email_text" name="email_text" rows="6" placeholder="Type your email here..." required></textarea>
+                <div id="error-message" class="text-danger mt-1" style="display: none;">Email text cannot be empty!</div>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Classify Email</button>
+        </form>
+        {% if result %}
+        <div class="result bg-light border text-center mt-4">
+            <p><strong>Input:</strong> [ email_text ]</p>
+            <p><strong>Prediction:</strong> <span class="text-success">[ result ]</span></p>
+        </div>
+        {% endif %}
+        <canvas id="spam-chart" class="mt-4"></canvas>
+    </div>
+
+    <script>
+        // Initialize chart
+        const ctx = document.getElementById('spam-chart').getContext('2d');
+        const spamChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Spam', 'Not Spam'],
+                datasets: [{
+                    data: [0, 0], // Initial data
+                    backgroundColor: ['#dc3545', '#198754'],
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                }
+            }
+        });
+
+        // Function to fetch and update chart data
+        async function updateChart() {
+            try {
+                const response = await fetch('/stats');
+                const stats = await response.json();
+                spamChart.data.datasets[0].data = [stats.spam, stats.not_spam];
+                spamChart.update();
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+
+        // Real-time validation for empty text
+        document.getElementById('spam-form').addEventListener('submit', function (e) {
+            const emailText = document.getElementById('email_text').value.trim();
+            if (!emailText) {
+                e.preventDefault();
+                document.getElementById('error-message').style.display = 'block';
+            } else {
+                document.getElementById('error-message').style.display = 'none';
+            }
+        });
+
+        // Update chart every 5 seconds
+        setInterval(updateChart, 5000);
+
+        // Initial chart update
+        updateChart();
+    </script>
+</body>
+</html>
